@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --font-body: "Segoe UI", "Be Vietnam Pro", Inter, system-ui, sans-serif;
+  --font-display: "Segoe UI Variable Display", "Space Grotesk", "Segoe UI", Inter, system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: #05060d;
+  color: #f8fbff;
+  font-family: var(--font-body);
+  text-rendering: geometricPrecision;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+button:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid rgba(20, 241, 255, 0.78);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: rgba(20, 241, 255, 0.28);
+  color: #fff;
+}
+
+.cyber-shell {
+  background:
+    radial-gradient(circle at 12% 4%, rgba(20, 241, 255, 0.16), transparent 28%),
+    radial-gradient(circle at 82% 9%, rgba(255, 122, 24, 0.13), transparent 30%),
+    radial-gradient(circle at 50% 92%, rgba(139, 92, 246, 0.13), transparent 34%),
+    #05060d;
+}
+
+.glass-panel {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.035)),
+    rgba(8, 11, 22, 0.78);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 24px 90px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(22px);
+}
+
+.cyber-border {
+  position: relative;
+}
+
+.cyber-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(20, 241, 255, 0.48), rgba(255, 122, 24, 0.32), rgba(139, 92, 246, 0.46));
+  opacity: 0.72;
+}
+
+.scan-lines {
+  background-image: linear-gradient(to bottom, transparent 0, transparent 9px, rgba(255, 255, 255, 0.032) 10px);
+  background-size: 100% 10px;
+}
+
+.noise-layer {
+  background-image:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 9px),
+    linear-gradient(25deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 12px);
+  opacity: 0.25;
+  mix-blend-mode: screen;
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #fff 0%, #14f1ff 34%, #ff7a18 62%, #fff 100%);
+  background-size: 240% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 4.8s linear infinite;
+}
+
+.skeleton-line {
+  background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(20,241,255,.16), rgba(255,255,255,.06));
+  background-size: 220% 100%;
+  animation: skeleton 1.6s linear infinite;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(20, 241, 255, 0.42) rgba(255, 255, 255, 0.05);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: linear-gradient(#14f1ff, #8b5cf6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
