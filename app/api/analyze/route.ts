@@ -96,8 +96,19 @@ Chỉ trả về JSON hợp lệ theo schema, không markdown, không code fence
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const mode: Mode = body?.mode === "message" ? "message" : "url";
+    const advertisedLength = Number(request.headers.get("content-length") || "0");
+    if (advertisedLength > 16000) {
+      return NextResponse.json({ error: "Yêu cầu vượt quá giới hạn kích thước." }, { status: 413 });
+    }
+    const raw = await request.text();
+    if (Buffer.byteLength(raw, "utf8") > 16000) {
+      return NextResponse.json({ error: "Yêu cầu vượt quá giới hạn kích thước." }, { status: 413 });
+    }
+    const body = JSON.parse(raw);
+    if (body?.mode !== "url" && body?.mode !== "message") {
+      return NextResponse.json({ error: "Loại phân tích không hợp lệ." }, { status: 400 });
+    }
+    const mode: Mode = body.mode;
     const content = typeof body?.content === "string" ? body.content.trim() : "";
 
     if (content.length < 4) {
@@ -124,10 +135,18 @@ export async function POST(request: Request) {
     }
 
     const modelCandidates = Array.from(new Set([configuredModel, ...MODEL_CANDIDATES]));
+    // Finite request-wide budget: unreachable providers cannot hang the UI indefinitely.
+    const deadline = Date.now() + 25000;
     let lastApiError = "";
 
     for (const model of modelCandidates) {
-      const apiResult = await callGeminiInteraction({ apiKey, model, mode, content });
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) {
+        lastApiError = "Đã hết thời gian gọi Gemini (25 giây).";
+        break;
+      }
+      const apiResult = await callGeminiInteraction({ apiKey, model, mode, content,
+        timeoutMs: Math.min(9000, Math.max(1000, remaining)) });
 
       if (apiResult.ok) {
         return NextResponse.json({ result: normalizeAnalysis(apiResult.data, mode, model) });
@@ -152,12 +171,14 @@ async function callGeminiInteraction({
   apiKey,
   model,
   mode,
-  content
+  content,
+  timeoutMs
 }: {
   apiKey: string;
   model: string;
   mode: Mode;
   content: string;
+  timeoutMs: number;
 }): Promise<
   | { ok: true; data: Record<string, unknown> }
   | { ok: false; message: string; retryWithNextModel: boolean }
@@ -185,7 +206,8 @@ async function callGeminiInteraction({
           schema: ANALYSIS_SCHEMA
         }
       }),
-      cache: "no-store"
+      cache: "no-store",
+      signal: AbortSignal.timeout(timeoutMs)
     });
 
     if (!response.ok) {
