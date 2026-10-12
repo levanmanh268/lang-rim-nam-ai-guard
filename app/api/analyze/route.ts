@@ -96,8 +96,19 @@ Chỉ trả về JSON hợp lệ theo schema, không markdown, không code fence
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const mode: Mode = body?.mode === "message" ? "message" : "url";
+    const advertisedLength = Number(request.headers.get("content-length") || "0");
+    if (advertisedLength > 16000) {
+      return NextResponse.json({ error: "Yêu cầu vượt quá giới hạn kích thước." }, { status: 413 });
+    }
+    const raw = await request.text();
+    if (Buffer.byteLength(raw, "utf8") > 16000) {
+      return NextResponse.json({ error: "Yêu cầu vượt quá giới hạn kích thước." }, { status: 413 });
+    }
+    const body = JSON.parse(raw);
+    if (body?.mode !== "url" && body?.mode !== "message") {
+      return NextResponse.json({ error: "Loại phân tích không hợp lệ." }, { status: 400 });
+    }
+    const mode: Mode = body.mode;
     const content = typeof body?.content === "string" ? body.content.trim() : "";
 
     if (content.length < 4) {
