@@ -50,6 +50,10 @@ try {
     assert.ok(Array.isArray(payload.result?.redFlags));
     assert.ok(Number.isFinite(payload.result?.riskScore));
   }
+  const badMode = await request({ mode: "administrator", content: "https://example.com/login" });
+  assert.equal(badMode.status, 400);
+  const oversizedRequest = await request({ mode: "message", content: "B".repeat(17000) });
+  assert.equal(oversizedRequest.status, 413);
   const malformed = await fetch(base + "/api/analyze", {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: '{"mode":"url",', signal: AbortSignal.timeout(5000),
